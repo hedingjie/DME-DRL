@@ -1,0 +1,66 @@
+# world settings
+json_dir: /../HouseExpo/json
+png_dir: /../assets/png
+map_id_train_set: /../assets/map_id_100.txt
+map_id_eval_set: /../assets/mapset_eval.txt
+
+# [GC,HC,NC]
+comm_mode: GC
+
+# robots settings
+robots:
+  number: 2
+  robotRadius: 3
+  commRange: 60
+  syncRange: 20
+  startPose:
+    x: 0
+    y: 0
+  resetRandomPose: 1
+  w1: 0.00002
+  w2: 0.001
+  w3: 0.1
+  subregionSize:
+    y: 20
+    x: 20
+
+# sensor settings
+laser:
+  range: 40
+  fov: 360
+  resolution: 0.1
+
+
+# others
+stateSize:
+  x: 145
+  y: 145
+
+# frontiers
+frontiers:
+  number: 8
+
+# map
+map:
+  y: 200
+  x: 200
+
+# color
+color:
+  # free: 10
+  # obstacle: 100
+  # uncertain: 55
+  # self: 200
+  # others: 150
+  # fog: 255
+
+  free: 0
+  obstacle: 100
+  uncertain: 50
+  self: 200
+  others: 150
+  fog: 255
+
+hyperparams:
+  alpha1: 0.01
+  alpha2: 0.01

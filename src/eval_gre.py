@@ -34,7 +34,7 @@ for times in range(TIMES):
         length = 0
         for step in range(MAX_STEPS):
             action = world.select_action_greedy()
-            done = world.move2targets()
+            done = world.move_to_targets()
             length = length + np.sum(world.path_length)
             if done:
                 print("Length: %d"%(length))

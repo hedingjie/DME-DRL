@@ -43,7 +43,7 @@ for times in range(TIMES):
                 break
             act_gre = world.select_target_randomly()
             try:
-                done = world.move2targets()
+                done = world.move_to_targets()
                 length = length + np.sum(world.path_length)
             except Exception as e:
                 print(e)

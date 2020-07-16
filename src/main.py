@@ -137,7 +137,7 @@ for i_episode in range(n_episode):
 
         if t != max_steps - 1:
             next_obs_history = th.tensor(obs_history_)
-        elif done:      # 我自己添加的
+        elif done:
             next_obs_history = None
         else:
             next_obs_history = None
@@ -150,7 +150,7 @@ for i_episode in range(n_episode):
         if t % 10 == 0:
             c_loss, a_loss = maddpg.update_policy()
         if done:
-            break       # 我自己添加的
+            break
 
     # if not discard:
     maddpg.episode_done += 1

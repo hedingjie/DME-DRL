@@ -4,7 +4,7 @@ png_dir: /../assets/png
 map_id_train_set: /../assets/map_id_100.txt
 map_id_eval_set: /../assets/mapset_eval.txt
 
-# [GC,HC,NC]
+# [GC,LC,NC]
 comm_mode: GC
 
 # robots settings

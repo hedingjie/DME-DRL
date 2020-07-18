@@ -1,6 +1,6 @@
 from collections import namedtuple
 import random
-Experience = namedtuple('Experience',('states','actions','next_states','rewards','poses','next_pose'))
+Experience = namedtuple('Experience',('states','actions','next_states','rewards','done'))
 
 
 class ReplayMemory:

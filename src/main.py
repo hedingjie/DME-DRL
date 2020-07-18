@@ -2,7 +2,7 @@
 import robot_exploration_v1
 from maddpg.MADDPG import MADDPG
 import numpy as np
-import torch as th
+import torch
 from tensorboardX import SummaryWriter
 from copy import copy,deepcopy
 from torch.distributions import categorical
@@ -25,10 +25,10 @@ world = robot_exploration_v1.RobotExplorationT1()
 reward_record = []
 
 np.random.seed(1234)
-th.manual_seed(1234)
+torch.manual_seed(1234)
 world.seed(1234)
 n_agents = world.number
-n_states = world.number
+n_states = 8
 n_actions = 8
 n_pose = 2
 # capacity = 1000000
@@ -40,7 +40,7 @@ n_episode = 200000
 # max_steps = 1000
 max_steps = 50
 # episodes_before_train = 1000
-episodes_before_train = 100
+episodes_before_train = 10
 
 win = None
 param = None
@@ -49,7 +49,7 @@ load_model = False
 CONFIG_PATH = os.getcwd() + '/../assets/config.yaml'
 MODEL_DIR = os.getcwd() + '/../model/'
 
-maddpg = MADDPG(n_agents, n_states, n_actions, n_pose, batch_size, capacity,
+maddpg = MADDPG(n_agents, n_states, n_actions, batch_size, capacity,
                 episodes_before_train)
 with open(CONFIG_PATH,'r') as stream:
     config = yaml.safe_load(stream)
@@ -58,7 +58,7 @@ if load_model:
     if not os.path.exists(MODEL_DIR):
         pass
     else:
-        checkpoints = th.load(MODEL_DIR+'/model/model-%d.pth'%(config['robots']['number']))
+        checkpoints = torch.load(MODEL_DIR + '/model/model-%d.pth' % (config['robots']['number']))
         for i, actor in enumerate(maddpg.actors):
             actor.load_state_dict(checkpoints['actor_%d' % (i)])
             maddpg.actors_target[i] = deepcopy(actor)
@@ -71,22 +71,16 @@ if load_model:
             critic_optim.load_state_dict(checkpoints['critic_optim_%d' % (i)])
 
 
-FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
+FloatTensor = torch.cuda.FloatTensor if maddpg.use_cuda else torch.FloatTensor
 for i_episode in range(n_episode):
     try:
-        obs,pose = world.reset()
-        pose = th.tensor(pose)
+        obs = world.reset()
     except Exception as e:
         continue
     obs = np.stack(obs)
     total_reward = 0.0
-    rr = np.zeros((n_agents,))
-    wrong_step = 0
+    rr = torch.zeros((n_agents), requires_grad=False)
     for t in range(max_steps):
-        # render every 100 episodes to speed up training
-        if i_episode % 100 == 0 and e_render:
-            world.render()
-        # obs_history = obs_history.type(FloatTensor)
         action_probs = maddpg.select_action(obs).data.cpu()
         action_probs_valid = np.copy(action_probs)
         action = []
@@ -95,25 +89,21 @@ for i_episode in range(n_episode):
             for j,frt in enumerate(rbt.get_frontiers()):
                 if len(frt) == 0:
                     action_probs_valid[i][j] = 0
-            action.append(categorical.Categorical(probs=th.tensor(action_probs_valid[i])).sample())
+            action.append(categorical.Categorical(probs=torch.tensor(action_probs_valid[i])).sample())
 
-        action = th.tensor(onehot_from_action(action))
+        action = onehot_from_action(action)
         acts = np.argmax(action,axis=1)
         for i in range(len(acts)):
             if len(world.robots[i].frontiers[acts[i]]) == 0:
                 # NOOP 指令
                 acts[i] = -1
 
-        obs_, reward, done, _, next_pose = world.step(acts)
-        next_pose = th.tensor(next_pose)
-        reward = th.FloatTensor(reward).type(FloatTensor)
-        obs_ = np.stack(obs_)
-        obs_ = th.from_numpy(obs_).float()
+        obs_, reward, done, _ = world.step(acts)
 
         if done:
             obs_ = None
-        total_reward += reward.sum()
-        rr += reward.cpu().numpy()
+        total_reward += np.sum(reward)
+        rr += torch.tensor(reward, requires_grad=False)
 
         maddpg.memory.push(obs, action, obs_, reward, done)
         obs = obs_
@@ -134,7 +124,7 @@ for i_episode in range(n_episode):
             dicts['critic_%d' % (i)] = maddpg.critics_target[i].state_dict()
             dicts['actor_optim_%d' % (i)] = maddpg.actor_optimizer[i].state_dict()
             dicts['critic_optim_%d' % (i)] = maddpg.critic_optimizer[i].state_dict()
-        th.save(dicts, MODEL_DIR+'/model-%d.pth'%(config['robots']['number']))
+        torch.save(dicts, MODEL_DIR + '/model-%d.pth' % (config['robots']['number']))
     print('Episode: %d, reward = %f' % (i_episode, total_reward))
     reward_record.append(total_reward)
     # visual

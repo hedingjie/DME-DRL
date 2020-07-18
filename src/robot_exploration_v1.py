@@ -53,9 +53,8 @@ class RobotExplorationT1(gym.Env):
             rbt.world = self
             rbt.reset(np.copy(self.maze))
         self._merge_map()
-        obs_n = []
-        for i,rbt in enumerate(self.robots):
-            obs_n.append(cv2.resize(rbt.get_obs(),(100,100),interpolation=cv2.INTER_NEAREST))
+        for rbt in self.robots:
+            rbt.get_obs()
         # if robots are in communication range, they communicate with others according to the mode
         if self.config['comm_mode'] == 'NC':
             # no communication
@@ -77,6 +76,9 @@ class RobotExplorationT1(gym.Env):
                             if np.linalg.norm(np.array(self_rbt.pose)-np.array(other_rbt.pose)) < self.config['robots']['syncRange']:
                                 # exchange complete information
                                 self._communicate(self_rbt, other_rbt)
+        obs_n = []
+        for i, rbt in enumerate(self.robots):
+            obs_n.append(rbt.get_obs())
         return obs_n
 
     def map_loader(self,map_id,padding=5):
@@ -129,7 +131,6 @@ class RobotExplorationT1(gym.Env):
         obs_n = []
         rwd_n = []
         info_n = []
-        pose_n = []
         for i, rbt in enumerate(self.robots):
             if action_n[i] == -1:
                 # NOOP
@@ -138,13 +139,9 @@ class RobotExplorationT1(gym.Env):
                 info = 'NOOP'
             else:
                 obs, rwd, done, info = rbt.step(action_n[i])
-            obs_n.append(cv2.resize(obs,(100,100),interpolation=cv2.INTER_NEAREST))
+            obs_n.append(obs)
             rwd_n.append(rwd)
             info_n.append(info)
-            pose = np.ones((1, self.number * 2)) * (-1)
-            pose[:, 2 * i] = rbt.pose[0]
-            pose[:, 2 * i + 1] = rbt.pose[1]
-            pose_n.append(pose)
         self._merge_map()
         if self.config['comm_mode'] == 'NC':
             # no communication
@@ -156,9 +153,7 @@ class RobotExplorationT1(gym.Env):
                         if self.config['comm_mode'] == 'LC':
                             if np.linalg.norm(np.array(self_rbt.pose) - np.array(other_rbt.pose)) < self.config['robots']['commRange']:
                                 # layers communication
-                                pose_n[i][:, 2 * j] = other_rbt.pose[0]
-                                pose_n[i][:, 2 * j + 1] = other_rbt.pose[1]
-                                self.data_transmitted = self.data_transmitted+pose_n[i].size
+                                pass
                             if np.linalg.norm(np.array(self_rbt.pose) - np.array(other_rbt.pose)) < self.config['robots']['syncRange']:
                                 # complete communication
                                 self._communicate(self_rbt, other_rbt)
@@ -174,7 +169,7 @@ class RobotExplorationT1(gym.Env):
         done = np.sum(self.slam_map == self.config['color']['free']) / np.sum(self.maze == self.config['color']['free']) > 0.95
         #if done:
             #self.track()
-        return obs_n,rwd_n,done,info_n,pose_n
+        return np.array(obs_n),np.array(rwd_n),done,info_n
 
     def move_to_targets(self):
         """

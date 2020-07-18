@@ -6,5 +6,6 @@
 /results/
 /src/__pycache__/
 /src/maddpg/__pycache__/
+/model/
 /*.pyc
 

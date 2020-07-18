@@ -79,20 +79,6 @@ for i_episode in range(n_episode):
     except Exception as e:
         continue
     obs = np.stack(obs)
-    # history initialization
-    obs_t_minus_0 = copy(obs)
-    obs_t_minus_1 = copy(obs)
-    obs_t_minus_2 = copy(obs)
-    obs_t_minus_3 = copy(obs)
-    obs_t_minus_4 = copy(obs)
-    obs_t_minus_5 = copy(obs)
-    obs_history=np.zeros((n_agents,obs.shape[1]*6,obs.shape[2]))
-    for i in range(n_agents):
-        obs_history[i] = np.vstack((obs_t_minus_0[i],obs_t_minus_1[i],obs_t_minus_2[i],
-                            obs_t_minus_3[i],obs_t_minus_4[i],obs_t_minus_5[i]))
-
-    if isinstance(obs, np.ndarray):
-        obs_history = th.from_numpy(obs_history).float()
     total_reward = 0.0
     rr = np.zeros((n_agents,))
     wrong_step = 0
@@ -100,8 +86,8 @@ for i_episode in range(n_episode):
         # render every 100 episodes to speed up training
         if i_episode % 100 == 0 and e_render:
             world.render()
-        obs_history = obs_history.type(FloatTensor)
-        action_probs = maddpg.select_action(obs_history, pose).data.cpu()
+        # obs_history = obs_history.type(FloatTensor)
+        action_probs = maddpg.select_action(obs).data.cpu()
         action_probs_valid = np.copy(action_probs)
         action = []
         for i,probs in enumerate(action_probs):
@@ -124,29 +110,13 @@ for i_episode in range(n_episode):
         obs_ = np.stack(obs_)
         obs_ = th.from_numpy(obs_).float()
 
-        obs_t_minus_5 = copy(obs_t_minus_4)
-        obs_t_minus_4 = copy(obs_t_minus_3)
-        obs_t_minus_3 = copy(obs_t_minus_2)
-        obs_t_minus_2 = copy(obs_t_minus_1)
-        obs_t_minus_1 = copy(obs_t_minus_0)
-        obs_t_minus_0 = copy(obs_)
-        obs_history_ = np.zeros((n_agents, obs.shape[1] * 6, obs.shape[2]))
-        for i in range(n_agents):
-            obs_history_[i] = np.vstack((obs_t_minus_0[i], obs_t_minus_1[i], obs_t_minus_2[i],
-                                             obs_t_minus_3[i], obs_t_minus_4[i], obs_t_minus_5[i]))
-
-        if t != max_steps - 1:
-            next_obs_history = th.tensor(obs_history_)
-        elif done:
-            next_obs_history = None
-        else:
-            next_obs_history = None
+        if done:
+            obs_ = None
         total_reward += reward.sum()
         rr += reward.cpu().numpy()
 
-        maddpg.memory.push(obs_history, action, next_obs_history, reward, pose, next_pose)
-        obs_history = next_obs_history
-        pose = next_pose
+        maddpg.memory.push(obs, action, obs_, reward, done)
+        obs = obs_
         if t % 10 == 0:
             c_loss, a_loss = maddpg.update_policy()
         if done:

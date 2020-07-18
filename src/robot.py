@@ -221,7 +221,9 @@ class Robot():
         """每一个机器人都获取自己观察视野内的本地地图"""
         observation = self.get_state()
         self.get_frontiers()
-        return observation
+        centers = [np.mean(point, axis=1) if len(points)>0 else None for points in self.frontiers for point in points]
+        c_distance = list(map(self.eular_dis,centers))
+        return c_distance
 
     def get_frontiers(self):
         """获取前沿，采用地图相减的算法"""

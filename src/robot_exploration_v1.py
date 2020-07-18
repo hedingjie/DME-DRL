@@ -54,13 +54,8 @@ class RobotExplorationT1(gym.Env):
             rbt.reset(np.copy(self.maze))
         self._merge_map()
         obs_n = []
-        pose_n = []
         for i,rbt in enumerate(self.robots):
             obs_n.append(cv2.resize(rbt.get_obs(),(100,100),interpolation=cv2.INTER_NEAREST))
-            pose = np.ones((1, self.number * 2)) * (-1)
-            pose[:,2*i] = rbt.pose[0]
-            pose[:,2*i+1] = rbt.pose[1]
-            pose_n.append(pose)
         # if robots are in communication range, they communicate with others according to the mode
         if self.config['comm_mode'] == 'NC':
             # no communication
@@ -77,13 +72,12 @@ class RobotExplorationT1(gym.Env):
                             # layers communication
                             if np.linalg.norm(np.array(self_rbt.pose) - np.array(other_rbt.pose)) < self.config['robots']['commRange']:
                                 # exchange position information
-                                pose_n[i][:,2*j] = other_rbt.pose[0]
-                                pose_n[i][:,2*j+1] = other_rbt.pose[1]
+                                pass
 
                             if np.linalg.norm(np.array(self_rbt.pose)-np.array(other_rbt.pose)) < self.config['robots']['syncRange']:
                                 # exchange complete information
                                 self._communicate(self_rbt, other_rbt)
-        return obs_n,pose_n
+        return obs_n
 
     def map_loader(self,map_id,padding=5):
         png_dir = os.getcwd()+self.config['png_dir']

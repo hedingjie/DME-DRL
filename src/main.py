@@ -34,13 +34,13 @@ n_pose = 2
 # capacity = 1000000
 capacity = 5000
 # batch_size = 1000
-batch_size = 100
+batch_size = 500
 
 n_episode = 200000
 # max_steps = 1000
 max_steps = 50
 # episodes_before_train = 1000
-episodes_before_train = 10
+episodes_before_train = 50
 
 win = None
 param = None

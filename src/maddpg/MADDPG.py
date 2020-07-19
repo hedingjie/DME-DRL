@@ -5,6 +5,7 @@ from maddpg.memory import ReplayMemory, Experience
 from torch.optim import Adam
 import torch.nn as nn
 import numpy as np
+from sim_utils import gumbel_softmax
 
 LOAD_MODEL = False
 
@@ -31,7 +32,8 @@ class MADDPG:
         self.memory = ReplayMemory(capacity)
         self.batch_size = batch_size
         # self.use_cuda = t.cuda.is_available()
-        self.use_cuda = False
+        self.use_cuda = torch.cuda.is_available()
+        self.device = torch.device('cuda:0' if self.use_cuda else 'cpu:0')
         self.episodes_before_train = episodes_before_train
 
         self.GAMMA = 0.95
@@ -40,8 +42,8 @@ class MADDPG:
         # self.var = [1.0 for i in range(n_agents)]
         self.var = [0.01 for i in range(n_agents)]
 
-        self.actors = [Actor(dim_obs, dim_act) for i in range(n_agents)]
-        self.critics = [Critic(n_agents, dim_obs, dim_act) for i in range(n_agents)]
+        self.actors = [Actor(dim_obs, dim_act).to(self.device) for i in range(n_agents)]
+        self.critics = [Critic(n_agents, dim_obs, dim_act).to(self.device) for i in range(n_agents)]
         self.critic_optimizer = [Adam(x.parameters(),
                                       lr=0.001) for x in self.critics]
         self.actor_optimizer = [Adam(x.parameters(),
@@ -50,15 +52,15 @@ class MADDPG:
         self.actors_target = deepcopy(self.actors)
         self.critics_target = deepcopy(self.critics)
 
-        if self.use_cuda:
-            for x in self.actors:
-                x.cuda()
-            for x in self.critics:
-                x.cuda()
-            for x in self.actors_target:
-                x.cuda()
-            for x in self.critics_target:
-                x.cuda()
+        # if self.use_cuda:
+        #     for x in self.actors:
+        #         x.cuda()
+        #     for x in self.critics:
+        #         x.cuda()
+        #     for x in self.actors_target:
+        #         x.cuda()
+        #     for x in self.critics_target:
+        #         x.cuda()
 
         self.steps_done = 0
         self.episode_done = 0
@@ -132,13 +134,15 @@ class MADDPG:
 
     def select_action(self, state_batch):
         # state_batch: n_agents x state_dim
+        FloatTensor = torch.cuda.FloatTensor if self.use_cuda else torch.FloatTensor
         with torch.no_grad():
-            actions = torch.zeros(self.n_agents,self.n_actions)
-            state_batch = torch.tensor(state_batch,dtype=torch.float)
+            actions = torch.zeros(self.n_agents,self.n_actions).type(FloatTensor)
+            state_batch = torch.tensor(state_batch,dtype=torch.float).type(FloatTensor)
             for i in range(self.n_agents):
                 state = state_batch[i, :]
-                act = self.actors[i](state).squeeze()
-                act = torch.clamp(act, 1e-6, 1 - 1e-6)
-                actions[i, :] = act
+                act = self.actors[i](state).data.cpu()
+                act_prob=gumbel_softmax(act).squeeze()
+                act_prob = torch.clamp(act_prob, 1e-6, 1 - 1e-6)
+                actions[i, :] = act_prob
             self.steps_done += 1
             return torch.squeeze(actions)

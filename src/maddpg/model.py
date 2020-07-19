@@ -36,7 +36,6 @@ class Critic(basic_module.BasicModule):
         x = self.fc2(x)
         x = self.fc3(x)
         x = self.fc4(x)
-        x = F.softmax(x,dim=1)
         return x
 
 
@@ -66,5 +65,5 @@ class Actor(basic_module.BasicModule):
         x = self.fc2(x)
         x = self.fc3(x)
         x = self.fc4(x)
-        action = gumbel_softmax(x.unsqueeze(dim=0))
-        return action
+        x = torch.unsqueeze(x,dim=0)
+        return x

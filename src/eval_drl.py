@@ -59,7 +59,7 @@ for times in range(TIMES):
             acts = np.argmax(action, axis=1)
 
             obs_, reward, done, _ = world.step(acts)
-            length = length+np.sum(world.path_length)
+            length = length+np.max(world.path_length)
             obs_ = np.stack(obs_)
 
             if not t == MAX_STEPS - 1:

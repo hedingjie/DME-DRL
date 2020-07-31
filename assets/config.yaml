@@ -9,7 +9,7 @@ comm_mode: GC
 
 # robots settings
 robots:
-  number: 2
+  number: 6
   robotRadius: 3
   commRange: 60
   syncRange: 20

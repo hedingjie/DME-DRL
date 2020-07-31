@@ -4,6 +4,7 @@ from copy import deepcopy
 from maddpg.memory import ReplayMemory, Experience
 from torch.optim import Adam
 import torch.nn as nn
+import os
 
 LOAD_MODEL = False
 
@@ -163,3 +164,19 @@ class MADDPG:
             actions[i, :] = act
         self.steps_done += 1
         return t.squeeze(actions)
+
+    def load_model(self, model_dir):
+        if not os.path.exists(model_dir):
+            raise Exception('Error: No model is here!')
+        else:
+            checkpoints = t.load(model_dir + '/model/model-%d.pth' % (self.n_agents))
+            for i, actor in enumerate(self.actors):
+                actor.load_state_dict(checkpoints['actor_%d' % (i)])
+                self.actors_target[i] = deepcopy(actor)
+            for i, critic in enumerate(self.critics):
+                critic.load_state_dict(checkpoints['critic_%d' % (i)])
+                self.critics_target[i] = deepcopy(critic)
+            for i, actor_optim in enumerate(self.actor_optimizer):
+                actor_optim.load_state_dict(checkpoints['actor_optim_%d' % (i)])
+            for i, critic_optim in enumerate(self.critic_optimizer):
+                critic_optim.load_state_dict(checkpoints['critic_optim_%d' % (i)])

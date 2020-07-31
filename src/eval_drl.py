@@ -34,6 +34,7 @@ for times in range(TIMES):
     header = ['map_id','steps']
     data = []
     maddpg = MADDPG(n_agents, n_states, n_actions, dim_pose, 0, 0, -1)
+    maddpg.load_model(os.getcwd()+'/..')
     trackPath = os.getcwd() + '/../track/DRL/%s/'%times
     if not os.path.exists(trackPath):
         os.makedirs(trackPath)

@@ -1,6 +1,6 @@
 # DME-DRL
 This is the repository for "Decentralized exploration of structured environment based on multi-agent deep reinforcement learning" : 
-
+![demo](/res/picture.png)
 
 # Environment Requirement
 - Ubuntu 16.06 or later

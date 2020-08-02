@@ -18,8 +18,8 @@ This is the repository for "Decentralized exploration of structured environment 
 &nbsp;&nbsp;&nbsp;&nbsp;|--`eval_\*.py`: Evaluation codes<br>
 &nbsp;&nbsp;&nbsp;&nbsp;|--`main.py`: training code<br>
 &nbsp;&nbsp;&nbsp;&nbsp;|--`sim_utils.py`: simulator tools<br>
-|--viz<br>
-&nbsp;&nbsp;&nbsp;&nbsp;|--`vis_map.py`: map visulization code<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|--viz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|--`vis_map.py`: map visulization code<br>
      
 
 # Installation

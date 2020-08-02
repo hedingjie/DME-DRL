@@ -11,12 +11,15 @@ This is the repository for "Decentralized exploration of structured environment 
 - gym
 
 # Main Structure:
-|--assets
-     |--config.yaml: configurations, robot number, communication range, etc. can be set here.
-|--src
-     |--maddapg: DME-DRL algorithm files
-     |--eval_\*.py: Evaluation codes
-     |--main.py: training code
+|--assets<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|--`config.yaml`: configurations, robot number, communication range, etc. can be set here.<br>
+|--src<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|--maddapg: DME-DRL algorithm files<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|--`eval_\*.py`: Evaluation codes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|--`main.py`: training code<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|--`sim_utils.py`: simulator tools<br>
+|--viz<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|--`vis_map.py`: map visulization code<br>
      
 
 # Installation

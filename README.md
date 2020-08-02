@@ -1,5 +1,5 @@
 # DME-DRL
-This is the repository for "Decentralized exploration of structured environment based on multi-agent deep reinforcement learning" : 
+This is the repository for "Decentralized Exploration of a Structured Environment Based on Multi-agent Deep Reinforcement Learning" : 
 ![demo](/res/demo.png)
 
 # Environment Requirement

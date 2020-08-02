@@ -32,5 +32,5 @@ This is the repository for "Decentralized exploration of structured environment 
 - Train: `python main.py (in the src dir)`
 - Evaluate: `python eval_drl.py`
 
-# Any Questions?
+# Any Questiones?
 Please send email to my email: dingjiehe@gmail.com.
